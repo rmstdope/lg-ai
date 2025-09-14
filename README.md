@@ -177,7 +177,7 @@ src/db/migrations/
 ```
 Track an `applied_migrations` table and apply those not yet recorded. For now, simplicity wins.
 
-## 7. Using shadcn/ui Components
+## 8. Using shadcn/ui Components
 
 Components are added one at a time (scaffold already initialized). To add more:
 1. Follow https://www.shadcn.io/docs components guide.
@@ -186,7 +186,128 @@ Components are added one at a time (scaffold already initialized). To add more:
 
 Already included: buttons, dialogs, forms, badges, pagination, etc. See existing Todo UI for examples of composition + theming.
 
-## 8. Development Workflow Tips
+## 9. Client Development (Routes, Components, Data Fetching)
+
+This section expands on how to work inside the `frontend/` app.
+
+### 9.1 Adding a New Route/Page
+Routes are configured in `frontend/src/main.tsx` using `createBrowserRouter` and nested under the root layout (`app/root.tsx`). To add a route (example: `/projects`):
+1. Create a component file: `frontend/app/routes/projects.tsx` exporting a React component.
+2. Import it in `frontend/src/main.tsx`.
+3. Add a route object entry: `{ path: "projects", element: <ProjectsRoute /> }` inside the `children` array.
+4. (Optional) Add a nav link in `TopNavBar` (`frontend/app/components/top-nav-bar.tsx`).
+
+Example skeleton:
+```tsx
+// frontend/app/routes/projects.tsx
+export default function ProjectsRoute() {
+   return <div className="p-4">Projects coming soon…</div>;
+}
+```
+
+### 9.2 Where Components Live
+- Reusable presentational UI primitives: `frontend/app/components/ui/` (buttons, dialogs, badges, etc.).
+- Feature-specific components (domain logic + UI): place inside a folder under `frontend/app/components/` (e.g. `todos/`, `projects/`).
+- Hooks: `frontend/app/lib/hooks/`.
+- API clients: `frontend/app/lib/api/`.
+- Types & DTO helpers: `frontend/app/lib/types/`.
+Keep domain separation: don't intermix feature components inside `ui/` (reserve it for generic primitives).
+
+### 9.3 Adding New shadcn/ui Components
+The project is already initialized. To pull in a new component (example: `accordion`):
+```bash
+npx shadcn@latest add accordion
+```
+This generates files (usually under `components/ui`) which you should then move/organize if needed to match existing naming. After generation:
+- Ensure imports use relative paths consistent with existing components.
+- If a utility like `cn` is duplicated, deduplicate and reuse existing one (check `frontend/app/lib/utils.ts` or similar).
+
+### 9.4 Styling & Theming
+Theme toggling is handled by `ThemeProvider` in `app/root.tsx`. Use Tailwind utility classes and existing variant helpers (e.g. `button` component) rather than ad‑hoc inline styles.
+
+### 9.5 Tailwind CSS Basics
+Tailwind is imported directly in `frontend/app/app.css` using the new v4 `@import "tailwindcss";` syntax plus `tw-animate-css` for animations. Theme tokens (colors, radius, etc.) are declared as CSS custom properties (OKLCH color space) and mapped via the `@theme` blocks.
+
+Key points:
+- Dark mode: toggled by adding/removing the `dark` class on `<html>` (handled by `ThemeProvider`). Use `dark:` variants in class names (e.g. `bg-card dark:bg-card` is often already covered by CSS variables, so prefer variables first).
+- Color & spacing: Prefer semantic variables through existing component classes instead of hardcoding arbitrary values unless prototyping.
+- Composition: Use utility-first approach (`flex gap-2 items-center`) and extract repeating patterns into small components rather than custom global CSS.
+- Animation: Utilities from `tw-animate-css` can be applied as classes (e.g. `animate-fade-in`).
+
+Common patterns:
+```tsx
+<div className="p-4 md:p-6 bg-card rounded-lg shadow-sm border border-border">Content</div>
+
+<button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+   Save
+</button>
+
+<div className="flex flex-col sm:flex-row gap-4">
+   <aside className="w-full sm:w-64 space-y-2">Sidebar</aside>
+   <main className="flex-1">Main</main>
+</div>
+```
+
+Customizing theme tokens:
+- Edit CSS variables in `app/app.css` under `:root` and `.dark` blocks.
+- Add new semantic tokens (e.g. `--color-warning`) then map them inside `@theme inline` if you want Tailwind to expose variants.
+
+Responsive & state variants:
+- Use standard Tailwind prefixes: `sm: md: lg: xl:` for breakpoints, `hover: focus: disabled:` for states, `aria-[expanded=true]:` for ARIA-based styling (Radix components often expose these attributes).
+
+Helpful resources:
+- Docs: https://tailwindcss.com/docs
+- Shadcn + Tailwind patterns: https://ui.shadcn.com
+- Color tuning (OKLCH): https://oklch.com/
+
+If you find repeated multi-class combinations across components, consider a helper using `clsx` or `class-variance-authority` rather than adding bespoke CSS.
+
+### 9.5 Fetching Data from the Backend
+Centralize HTTP calls through API client modules (e.g. `frontend/app/lib/api/todos.ts`). Do NOT call `fetch()` directly in route components unless prototyping—add a small wrapper instead for consistency & error handling.
+
+Pattern:
+1. Define request/response types in `lib/types/` (see `types/todo.ts`).
+2. Implement API functions in `lib/api/<entity>.ts`.
+3. Create/extend a hook in `lib/hooks/` to encapsulate loading state, errors, optimistic updates.
+4. Use the hook inside route / feature components.
+
+### 9.6 Creating a New Entity Frontend Flow (Projects Example)
+1. Backend: create table + repo + routes (`projects`).
+2. Frontend: add types `frontend/app/lib/types/project.ts`.
+3. Add API client `frontend/app/lib/api/projects.ts` (mirror todos structure).
+4. Add hook `useProjects.ts` for list/create/update/delete with optimistic patterns (copy `useTodos.ts` as a starting point and prune fields).
+5. Build UI components under `frontend/app/components/projects/` (e.g. `ProjectList.tsx`, `ProjectCard.tsx`).
+6. Wire route `projects.tsx` using the hook and components.
+
+### 9.7 Optimistic Updates
+`useTodos` demonstrates optimistic create/update/delete:
+- Insert temporary item with synthetic id for create.
+- Apply patch locally then rollback on failure.
+- Remove locally then undo on delete failure.
+Replicate this approach for new entities to keep UX responsive.
+
+### 9.8 Error Handling
+API errors are normalized into `ApiError` objects. Hooks set `error` state that components can render. Provide friendly UI states (loading skeletons, empty states, error messages) similar to existing Todo components (`frontend/app/components/todos/EmptyState.tsx`, etc.).
+
+### 9.9 Pagination & Filtering
+Use a single source of truth list hook (like `useTodos`) to manage filters. Debounce search inputs (see debounce logic in the hook) instead of uncontrolled firing on each keystroke.
+
+### 9.10 Form Components
+Reuse existing dialog + form patterns shown in `TodoFormDialog.tsx`. For new entities, duplicate structurally but extract truly generic parts over time rather than prematurely abstracting.
+
+### 9.11 Performance Tips
+- Avoid unnecessary re-renders: memoize derived arrays or heavy computations.
+- Keep large lists virtualized if they grow (could introduce a virtualization lib later; currently small scale so not included).
+
+### 9.12 Testing (Future)
+When a test setup is introduced (e.g. Vitest + React Testing Library), colocate tests next to components (`ComponentName.test.tsx`) or in a `__tests__` folder. Aim to test hooks in isolation and route rendering with mocked API modules.
+
+### 9.13 Common Pitfalls
+- Forgetting to update router when adding a new route component.
+- Duplicating API base URLs—keep a single `BASE_URL` or consider an env var later.
+- Importing from deep relative paths when an alias (`~/*`) exists (prefer the alias for app code).
+
+## 10. Development Workflow Tips
 
 - Type checking backend: `npm run check` (root)
 - Type checking frontend: `npm run typecheck` (inside `frontend`)
@@ -194,7 +315,7 @@ Already included: buttons, dialogs, forms, badges, pagination, etc. See existing
 - Frontend production build: `npm run build` (inside `frontend`), preview with `npm run preview`
 - DB seed (re-run manually if needed): `npm run db:seed` (root) – note it won't drop existing rows; adapt as needed.
 
-## 9. Troubleshooting
+## 11. Troubleshooting
 
 Port in use (3000): find the process (macOS) `lsof -i :3000` then kill it.
 Frontend cannot reach API: ensure backend running; check CORS headers (already permissive). Confirm network tab requests go to `http://localhost:3000`.
@@ -202,7 +323,7 @@ Database issues: delete the file `data/app.db` (and `-wal`, `-shm` sidecars) the
 Node version errors: run `nvm use 24` or reinstall Node 24.
 Type errors after dep changes: delete `node_modules` + run `npm install` again.
 
-## 10. Next Steps / Ideas
+## 12. Next Steps / Ideas
 
 - Add user auth (JWT or session)
 - Add filtering / sorting server-side
@@ -211,7 +332,7 @@ Type errors after dep changes: delete `node_modules` + run `npm install` again.
 - Implement optimistic UI updates
 - Add E2E tests (Playwright) for Todo flows
 
-## 11. FAQ (Quick)
+## 13. FAQ (Quick)
 
 Q: Where do I add new API routes?  
 A: Create a new router in `src/routes/` and mount it in `src/server.ts`.
