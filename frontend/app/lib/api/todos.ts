@@ -1,4 +1,4 @@
-// API client for Todo backend
+// API client for Todo backend relocated to avoid path collision with route path.
 // Uses fetch; centralizes error normalization and concurrency control.
 
 import {
@@ -9,7 +9,7 @@ import {
   type Todo,
   type UpdateTodoInput,
   buildTodoQuery,
-} from "./app/lib/types/todo";
+} from "~/lib/types/todo";
 
 const BASE_URL = "http://localhost:3000"; // backend origin
 
@@ -62,7 +62,6 @@ async function apiFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
   }
 
   if (!okStatuses.includes(res.status)) {
-    // Attempt to map validation errors / conflict
     const errShape = new ApiError({
       status: res.status,
       message: data?.message || res.statusText || "Request failed",
@@ -117,7 +116,6 @@ export async function deleteTodo(id: string): Promise<void> {
   });
 }
 
-// Narrow re-exports for convenience inside components
 export type {
   CreateTodoInput,
   ListParams,

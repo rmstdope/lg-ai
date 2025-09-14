@@ -6,7 +6,8 @@ import {
   ApiError,
   isApiError,
 } from "~/lib/types/todo";
-import { createTodo, deleteTodo, listTodos, updateTodo } from "../../../todos";
+// API functions relocated under lib/api to avoid static asset path collision with /todos route
+import { createTodo, deleteTodo, listTodos, updateTodo } from "~/lib/api/todos";
 
 // Public shape returned by the hook
 export interface UseTodosState {
