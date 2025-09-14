@@ -31,10 +31,13 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",
-    "typescript": "^5.9.2",
-    "tsx": "^4.16.5",
-    "vitest": "^2.0.0",
+    "@types/supertest": "^2.0.16",
+    "@vitejs/plugin-react": "^5.0.2",
+    "jsdom": "^27.0.0",
     "supertest": "^7.0.0",
-    "@types/supertest": "^2.0.16"
-  }  
+    "tsx": "^4.16.5",
+    "typescript": "^5.9.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  }
 }
