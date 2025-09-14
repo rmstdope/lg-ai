@@ -315,6 +315,20 @@ When a test setup is introduced (e.g. Vitest + React Testing Library), colocate 
 - Frontend production build: `npm run build` (inside `frontend`), preview with `npm run preview`
 - DB seed (re-run manually if needed): `npm run db:seed` (root) – note it won't drop existing rows; adapt as needed.
 
+### 10.1 Testing
+Backend tests (Vitest + Supertest) live alongside backend source (e.g. `src/routes/todos.test.ts`). Run:
+```bash
+npm run test        # one-off
+npm run test:watch  # watch mode
+```
+Frontend tests (Vitest + React Testing Library) are colocated with components (e.g. `app/components/.../*.test.tsx`). From `frontend/` directory:
+```bash
+npm run test
+npm run test:watch
+```
+JSDOM + jest-dom matchers are configured in `frontend/vitest.config.ts` and `frontend/vitest.setup.ts`.
+Add tests for new routes, hooks, and UI states (loading, empty, error) as you extend the project.
+
 ## 11. Troubleshooting
 
 Port in use (3000): find the process (macOS) `lsof -i :3000` then kill it.

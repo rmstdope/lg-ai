@@ -80,12 +80,25 @@ General style:
 - SQLite + better-sqlite3 is synchronous; keep heavy loops minimal inside request handlers.
 - For batch operations, consider wrapping DB work in a single transaction (extend current db helper if needed).
 
-## Testing (Current State / Guidance)
-- No automated test suite configured yet (no `vitest`, `jest`, or similar present).
-Agents introducing tests SHOULD:
-1. Add a dev dependency (recommend `vitest` + `supertest` for backend) in root for backend tests.
-2. Create `tests/` or `src/__tests__/` folder; name files `*.test.ts`.
-3. Update this `AGENTS.md` with test commands (e.g. add `"test": "vitest"` script) and ensure `README.md` stays concise.
+## Testing
+Backend:
+- Run all backend tests: `npm run test`
+- Watch mode: `npm run test:watch`
+- Tests live alongside source (e.g. `src/routes/todos.test.ts`).
+- Node environment (no jsdom required for API tests).
+
+Frontend:
+- From `frontend/`: `npm run test` or `npm run test:watch`.
+- JSDOM environment configured in `frontend/vitest.config.ts` with setup file `vitest.setup.ts` (adds jest-dom matchers).
+- Tests colocated with components (e.g. `app/components/todos/TodoCard.test.tsx`).
+
+Coverage:
+- Basic coverage reporters (text, html) enabled; html output appears in `coverage/` once generated.
+
+Adding new tests:
+- Prefer colocating `*.test.ts` or `*.test.tsx` near implementation.
+- For backend HTTP tests, use `supertest` against `createApp()` without starting a network listener.
+- For frontend component tests, mock network calls at the API client layer if needed.
 
 ## Typical Agent Tasks & Expectations
 When modifying API:

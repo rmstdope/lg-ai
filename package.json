@@ -7,7 +7,9 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "db:seed": "tsx src/db/seed.ts",
-    "check": "tsc -p tsconfig.json --noEmit"
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,9 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",
     "typescript": "^5.9.2",
-    "tsx": "^4.16.5"
+    "tsx": "^4.16.5",
+    "vitest": "^2.0.0",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^2.0.16"
   }  
 }
