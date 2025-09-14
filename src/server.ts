@@ -8,6 +8,29 @@ import { errorMiddleware } from "./utils/errors";
 
 export function createApp() {
   const app = express();
+
+  app.use((req, res, next) => {
+    const origin = req.headers.origin || "*";
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Vary", "Origin"); // So CDN/proxies don't mix origins
+    res.header(
+      "Access-Control-Allow-Headers",
+      req.headers["access-control-request-headers"] ||
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    );
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Max-Age", "600");
+
+    if (req.method === "OPTIONS") {
+      return res.status(204).end();
+    }
+    next();
+  });
+
   app.use(express.json());
   app.use(todosRouter);
 

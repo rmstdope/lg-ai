@@ -1,4 +1,5 @@
 // Home route component (meta handled via index.html or future head manager)
+import { NavLink } from "react-router-dom";
 
 export default function Home() {
   return (
@@ -13,12 +14,20 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted rounded-lg">
             <span className="text-sm text-muted-foreground">
               Ready to build your todo app! 🚀
             </span>
           </div>
+          <NavLink
+            to="/todos"
+            className={({ isActive }) =>
+              `inline-flex items-center px-5 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium ${isActive ? '' : ''}`
+            }
+          >
+            Go to Todos →
+          </NavLink>
         </div>
       </div>
     </div>
