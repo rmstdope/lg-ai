@@ -1,11 +1,4 @@
-import type { Route } from "./+types/home";
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Todo List Manager" },
-    { name: "description", content: "Manage your todos efficiently" },
-  ];
-}
+// Home route component (meta handled via index.html or future head manager)
 
 export default function Home() {
   return (

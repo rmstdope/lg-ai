@@ -1,49 +1,10 @@
-import {
-  isRouteErrorResponse,
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "react-router";
-
-import type { Route } from "./+types/root";
+import { isRouteErrorResponse, Outlet } from "react-router-dom";
 import "./app.css";
 import { ThemeProvider } from "./lib/theme-provider";
 import { TopNavBar } from "./components/top-nav-bar";
 
-export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
-];
-
-export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="min-h-screen">
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
-export default function App() {
+// AppLayout is the parent route element used by route objects in src/main.tsx
+export default function AppLayout() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="todo-app-theme">
       <div className="min-h-screen flex flex-col">
@@ -56,7 +17,8 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+// Local error boundary component (can be wired into router if desired)
+export function ErrorBoundary({ error }: { error: unknown }) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
@@ -89,12 +51,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
           </details>
         )}
         <div className="pt-4">
-          <a
-            href="/"
-            className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Go back home
-          </a>
+          <a href="/" className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">Go back home</a>
         </div>
       </div>
     </div>
