@@ -51,7 +51,12 @@ export function ErrorBoundary({ error }: { error: unknown }) {
           </details>
         )}
         <div className="pt-4">
-          <a href="/" className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">Go back home</a>
+          <a
+            href="/"
+            className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Go back home
+          </a>
         </div>
       </div>
     </div>
