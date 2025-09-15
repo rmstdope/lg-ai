@@ -21,6 +21,16 @@ export default function Home() {
               Ready to build your todo app! 🚀
             </span>
           </div>
+          {/* Sine Scroller moved higher up */}
+          <div>
+            <SineScroller 
+              text="*** WELCOME TO THE 80s RETRO EXPERIENCE *** STAY PRODUCTIVE AND ORGANIZED *** "
+              className="border border-cyan-500/30 rounded-lg shadow-lg shadow-cyan-500/20"
+              speed={3}
+              amplitude={15}
+              frequency={0.008}
+            />
+          </div>
           <NavLink
             to="/todos"
             className={({ isActive }) =>
@@ -38,17 +48,6 @@ export default function Home() {
             Go to Kanban →
           </NavLink>
         </div>
-      </div>
-      
-      {/* 80s Style Sine Scroller in the lower part */}
-      <div className="mt-auto">
-        <SineScroller 
-          text="*** WELCOME TO THE 80s RETRO EXPERIENCE *** STAY PRODUCTIVE AND ORGANIZED *** "
-          className="border border-cyan-500/30 rounded-lg shadow-lg shadow-cyan-500/20"
-          speed={3}
-          amplitude={15}
-          frequency={0.008}
-        />
       </div>
     </div>
   );
