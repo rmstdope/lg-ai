@@ -1,10 +1,11 @@
 // Home route component (meta handled via index.html or future head manager)
 import { NavLink } from "react-router-dom";
+import { SineScroller } from "../components/sine-scroller";
 
 export default function Home() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col">
+      <div className="max-w-4xl mx-auto flex-1">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
             Welcome to your productivity hub
@@ -37,6 +38,17 @@ export default function Home() {
             Go to Kanban →
           </NavLink>
         </div>
+      </div>
+      
+      {/* 80s Style Sine Scroller in the lower part */}
+      <div className="mt-auto">
+        <SineScroller 
+          text="*** WELCOME TO THE 80s RETRO EXPERIENCE *** STAY PRODUCTIVE AND ORGANIZED *** "
+          className="border border-cyan-500/30 rounded-lg shadow-lg shadow-cyan-500/20"
+          speed={3}
+          amplitude={15}
+          frequency={0.008}
+        />
       </div>
     </div>
   );
