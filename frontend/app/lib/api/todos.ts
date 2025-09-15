@@ -10,6 +10,7 @@ import {
   type UpdateTodoInput,
   buildTodoQuery,
 } from "~/lib/types/todo";
+import { getAuthHeader } from "../auth";
 
 const BASE_URL = "http://localhost:3000"; // backend origin
 
@@ -24,6 +25,11 @@ async function apiFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
     Accept: "application/json",
     ...(headers as Record<string, string> | undefined),
   };
+  // Add Authorization header if not already present
+  if (!finalHeaders["Authorization"]) {
+    const auth = getAuthHeader();
+    if (auth) finalHeaders["Authorization"] = auth;
+  }
   let body: BodyInit | undefined;
   if (jsonBody !== undefined) {
     finalHeaders["Content-Type"] = "application/json";

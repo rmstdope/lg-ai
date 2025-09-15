@@ -5,6 +5,7 @@ import { migrate } from "./db/migrate";
 import { seed } from "./db/seed";
 import { todosRouter } from "./routes/todos";
 import { errorMiddleware } from "./utils/errors";
+import { basicAuthMiddleware } from "./utils/basicAuth";
 
 export function createApp() {
   const app = express();
@@ -32,6 +33,8 @@ export function createApp() {
   });
 
   app.use(express.json());
+  app.use(basicAuthMiddleware);
+  app.get("/api/check", (req, res) => res.json({ ok: true }));
   app.use(todosRouter);
 
   app.use((_req, res, _next) => {
