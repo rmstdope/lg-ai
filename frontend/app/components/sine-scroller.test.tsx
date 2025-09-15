@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { SineScroller } from "./sine-scroller";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 
 // Mock HTMLCanvasElement and getContext for testing
 const mockGetContext = vi.fn(() => ({
