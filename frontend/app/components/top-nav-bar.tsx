@@ -31,6 +31,14 @@ export function TopNavBar() {
             >
               Todos
             </NavLink>
+            <NavLink
+              to="/kanban"
+              className={({ isActive }) =>
+                `hover:underline underline-offset-4 ${isActive ? 'font-medium text-foreground' : 'text-muted-foreground'}`
+              }
+            >
+              Kanban
+            </NavLink>
           </nav>
         </div>
 

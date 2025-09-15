@@ -28,6 +28,14 @@ export default function Home() {
           >
             Go to Todos →
           </NavLink>
+          <NavLink
+            to="/kanban"
+            className={({ isActive }) =>
+              `inline-flex items-center px-5 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm font-medium ${isActive ? '' : ''}`
+            }
+          >
+            Go to Kanban →
+          </NavLink>
         </div>
       </div>
     </div>
