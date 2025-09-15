@@ -9,11 +9,13 @@ interface KanbanCardProps {
 
 export function KanbanCard({ todo }: KanbanCardProps) {
   return (
-    <div className="bg-white rounded shadow p-4 mb-2">
+      <div
+        className="bg-white p-4 mb-3 border border-muted rounded-2xl shadow-lg flex flex-col gap-2 transition-transform duration-150 hover:scale-[1.025] hover:shadow-xl hover:border-primary/40"
+      >
       <div className="font-medium mb-1 line-clamp-2">{todo.title}</div>
       <div className="flex flex-wrap gap-2 items-center text-xs mb-1">
-        <PriorityBadge value={todo.priority} />
-        <DueDateBadge dueAt={todo.dueAt} status={todo.status} />
+    <PriorityBadge value={todo.priority} />
+    {todo.dueAt && <DueDateBadge dueAt={todo.dueAt} status={todo.status} />}
       </div>
       {todo.description && (
         <div className="text-gray-500 text-xs mb-1 line-clamp-2 whitespace-pre-wrap">

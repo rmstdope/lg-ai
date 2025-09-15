@@ -113,21 +113,27 @@ export default function KanbanRoute() {
                   ) : colCards.length === 0 ? (
                     <div className="text-muted-foreground text-sm">No cards</div>
                   ) : (
-                    colCards.map((card) => (
-                      <div
-                        key={card.id}
-                        draggable
-                        onDragStart={() => handleDragStart(card.id)}
-                        onDragEnd={handleDragEnd}
-                        onClick={() => {
-                          setEditTodo(card);
-                          setEditDialogOpen(true);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <KanbanCard todo={card} />
-                      </div>
-                    ))
+                    colCards.map((card) => {
+                      const isOverdue = card.dueAt && new Date(card.dueAt) < new Date() && card.status !== 'done';
+                      return (
+                        <div
+                          key={card.id}
+                          draggable
+                          onDragStart={() => handleDragStart(card.id)}
+                          onDragEnd={handleDragEnd}
+                          onClick={() => {
+                            setEditTodo(card);
+                            setEditDialogOpen(true);
+                          }}
+                          className={
+                            "cursor-pointer rounded-lg" +
+                            (isOverdue ? " ring-2 ring-red-500 ring-offset-2" : "")
+                          }
+                        >
+                          <KanbanCard todo={card} />
+                        </div>
+                      );
+                    })
                   )}
                 </KanbanColumn>
               </div>
