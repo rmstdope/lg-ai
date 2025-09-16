@@ -1,3 +1,4 @@
+import { useUsers } from "~/lib/hooks/useUsers";
 import React, { useState } from "react";
 import type { Todo } from "~/lib/types/todo";
 
@@ -18,10 +19,22 @@ const STATUSES = [
 
 export function KanbanEditDialog({ open, onOpenChange, todo, onSave }: KanbanEditDialogProps) {
   const [form, setForm] = useState<Partial<Todo>>({});
+  const { users, loading: usersLoading } = useUsers();
 
   React.useEffect(() => {
     if (todo) setForm(todo);
   }, [todo]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onOpenChange(false);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onOpenChange]);
 
   if (!open || !todo) return null;
 
@@ -98,6 +111,20 @@ export function KanbanEditDialog({ open, onOpenChange, todo, onSave }: KanbanEdi
           >
             {STATUSES.map(s => (
               <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          Assignee
+          <select
+            className="border rounded px-2 py-1"
+            value={form.assignee ?? ''}
+            onChange={e => handleChange("assignee", e.target.value === '' ? null : Number(e.target.value))}
+            disabled={usersLoading}
+          >
+            <option value="">Unassigned</option>
+            {users.map(u => (
+              <option key={u.id} value={u.id}>{u.username}</option>
             ))}
           </select>
         </label>

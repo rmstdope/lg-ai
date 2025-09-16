@@ -3,11 +3,15 @@ import { mapRowToTodo, Todo, TodoRow, Status } from '../types';
 import { nowIso } from '../config';
 import { HttpError } from '../utils/errors';
 import crypto from 'crypto';
-
 export interface ListParams {
-  q?: string; status?: Status; tag?: string; overdue?: boolean;
-  sort?: 'createdAt'|'updatedAt'|'dueAt'|'priority'|'title'; order?: 'asc'|'desc';
-  limit: number; offset: number;
+  q?: string;
+  status?: Status;
+  tag?: string;
+  overdue?: boolean;
+  sort?: 'createdAt'|'updatedAt'|'dueAt'|'priority'|'title';
+  order?: 'asc'|'desc';
+  limit: number;
+  offset: number;
 }
 
 const SORT_COLUMN: Record<string,string> = {
@@ -32,7 +36,7 @@ export function list(params: ListParams): { items: Todo[]; total: number } {
   const order = params.order === 'asc' ? 'ASC' : 'DESC';
 
   const baseSelect = `FROM todos LEFT JOIN todo_tags tt ON tt.todo_id = todos.id ${where}`;
-  const sql = `SELECT todos.*, GROUP_CONCAT(tt.tag, ',') AS tagsCsv ${baseSelect} GROUP BY todos.id ORDER BY ${sortCol} ${order} LIMIT ? OFFSET ?`;
+  const sql = `SELECT todos.*, todos.assignee, GROUP_CONCAT(tt.tag, ',') AS tagsCsv ${baseSelect} GROUP BY todos.id ORDER BY ${sortCol} ${order} LIMIT ? OFFSET ?`;
   const rows = db.prepare(sql).all(...args, params.limit, params.offset) as TodoRow[];
   const items = rows.map(mapRowToTodo);
 
@@ -43,25 +47,51 @@ export function list(params: ListParams): { items: Todo[]; total: number } {
 }
 
 export function getById(id: string): Todo | undefined {
-  const row = db.prepare(`SELECT todos.*, (SELECT GROUP_CONCAT(tag, ',') FROM todo_tags WHERE todo_id = todos.id) AS tagsCsv FROM todos WHERE id = ?`).get(id) as TodoRow | undefined;
+  const row = db.prepare(`SELECT todos.*, todos.assignee, (SELECT GROUP_CONCAT(tag, ',') FROM todo_tags WHERE todo_id = todos.id) AS tagsCsv FROM todos WHERE id = ?`).get(id) as TodoRow | undefined;
   return row ? mapRowToTodo(row) : undefined;
 }
 
-export interface CreateInput { title: string; description?: string; status?: Status; priority?: number; dueAt?: string; tags?: string[]; }
+export interface CreateInput {
+  title: string;
+  description?: string;
+  status?: Status;
+  priority?: number;
+  dueAt?: string;
+  tags?: string[];
+  assignee?: number | null;
+}
 
 export function create(input: CreateInput): Todo {
   const id = crypto.randomUUID();
   const now = nowIso();
-  const insertTodo = db.prepare(`INSERT INTO todos (id,title,description,status,priority,due_at,created_at,updated_at,version) VALUES (?,?,?,?,?,?,?,?,1)`);
+  const insertTodo = db.prepare(`INSERT INTO todos (id,title,description,status,priority,due_at,created_at,updated_at,version,assignee) VALUES (?,?,?,?,?,?,?,?,1,?)`);
   const insertTag = db.prepare(`INSERT INTO todo_tags (todo_id, tag) VALUES (?,?)`);
   withTx(() => {
-    insertTodo.run(id, input.title, input.description ?? null, input.status ?? 'todo', input.priority ?? 3, input.dueAt ?? null, now, now);
-    if (input.tags) input.tags.forEach(tag => insertTag.run(id, tag));
+    insertTodo.run(
+      id,
+      input.title,
+      input.description ?? null,
+      input.status ?? 'todo',
+      input.priority ?? 3,
+      input.dueAt ?? null,
+      now,
+      now,
+      input.assignee ?? null
+    );
+    if (input.tags) input.tags.forEach((tag: string) => insertTag.run(id, tag));
   });
   return getById(id)!; // should exist
 }
 
-export interface PatchInput { title?: string; description?: string; status?: Status; priority?: number; dueAt?: string; tags?: string[]; }
+export interface PatchInput {
+  title?: string;
+  description?: string;
+  status?: Status;
+  priority?: number;
+  dueAt?: string;
+  tags?: string[];
+  assignee?: number | null;
+}
 
 export function update(id: string, expectedVersion: number, patch: PatchInput): Todo {
   const currentRow = db.prepare(`SELECT * FROM todos WHERE id = ?`).get(id) as TodoRow | undefined;
@@ -77,6 +107,7 @@ export function update(id: string, expectedVersion: number, patch: PatchInput): 
   if (patch.status !== undefined) { sets.push('status = ?'); args.push(patch.status); }
   if (patch.priority !== undefined) { sets.push('priority = ?'); args.push(patch.priority); }
   if (patch.dueAt !== undefined) { sets.push('due_at = ?'); args.push(patch.dueAt ?? null); }
+  if (patch.assignee !== undefined) { sets.push('assignee = ?'); args.push(patch.assignee ?? null); }
   sets.push('updated_at = ?'); args.push(nowIso());
   sets.push('version = version + 1');
 
@@ -88,12 +119,12 @@ export function update(id: string, expectedVersion: number, patch: PatchInput): 
     if (patch.tags) {
       db.prepare(`DELETE FROM todo_tags WHERE todo_id = ?`).run(id);
       const ins = db.prepare(`INSERT INTO todo_tags (todo_id, tag) VALUES (?,?)`);
-      patch.tags.forEach(tag => ins.run(id, tag));
+      patch.tags.forEach((tag: string) => ins.run(id, tag));
     }
   });
   return getById(id)!;
 }
 
 export function remove(id: string): void {
-  db.prepare(`DELETE FROM todos WHERE id = ?`).run(id);
+  db.prepare('DELETE FROM todos WHERE id = ?').run(id);
 }

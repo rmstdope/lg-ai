@@ -21,6 +21,21 @@ export default function LoginRoute() {
     });
     if (res.ok) {
       localStorage.setItem("auth", btoa(`${username}:${password}`));
+      // Try to get user id from /users?username=... (since /api/check does not return user info)
+      try {
+        const usersRes = await fetch(`/users?username=${encodeURIComponent(username)}`, {
+          headers: { Accept: 'application/json' },
+        });
+        if (usersRes.ok) {
+          const data = await usersRes.json();
+          const user = Array.isArray(data.items) ? data.items.find((u: any) => u.username === username) : null;
+          if (user && user.id != null) {
+            localStorage.setItem('currentUserId', String(user.id));
+          }
+        }
+      } catch (e) {
+        // ignore, fallback: currentUserId not set
+      }
       navigate(from, { replace: true });
     } else {
       setError("Invalid username or password");

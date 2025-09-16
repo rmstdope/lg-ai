@@ -1,3 +1,4 @@
+import { useUserMap } from "~/lib/hooks/useUsers";
 import type { Todo } from "~/lib/types/todo";
 import { PriorityBadge } from "./PriorityBadge";
 import { StatusBadge } from "./StatusBadge";
@@ -24,6 +25,8 @@ export function TodoCard({
     todo.dueAt &&
     new Date(todo.dueAt).getTime() < Date.now() &&
     !["done", "archived"].includes(todo.status);
+  const { userMap } = useUserMap();
+  const assigneeName = todo.assignee != null ? userMap[todo.assignee] : undefined;
   return (
     <div
       className={cn(
@@ -49,6 +52,11 @@ export function TodoCard({
             <span className="text-muted-foreground" aria-label="Updated at">
               {formatUpdatedAt(todo.updatedAt)}
             </span>
+            {assigneeName && (
+              <span className="text-muted-foreground italic" aria-label="Assignee">
+                Assigned to: {assigneeName}
+              </span>
+            )}
           </div>
         </div>
         {actions && <div className="self-start">{actions}</div>}

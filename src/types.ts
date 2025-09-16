@@ -1,3 +1,18 @@
+// User types
+export interface User {
+  id: number;
+  username: string;
+}
+
+export interface UserWithPassword extends User {
+  password: string;
+}
+
+export interface UserRow {
+  id: number;
+  username: string;
+  password: string;
+}
 export type Status = 'todo' | 'in_progress' | 'done' | 'archived';
 
 export interface Todo {
@@ -11,6 +26,7 @@ export interface Todo {
   createdAt: string; // ISO8601
   updatedAt: string; // ISO8601
   version: number;
+  assignee: number | null; // user id or null
 }
 
 export interface ApiError {
@@ -31,6 +47,7 @@ export interface TodoRow {
   created_at: string;
   updated_at: string;
   version: number;
+  assignee: number | null;
   tagsCsv?: string | null; // from GROUP_CONCAT
 }
 
@@ -45,6 +62,7 @@ export function mapRowToTodo(row: TodoRow): Todo {
     dueAt: row.due_at ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    version: row.version
+    version: row.version,
+    assignee: row.assignee ?? null
   };
 }

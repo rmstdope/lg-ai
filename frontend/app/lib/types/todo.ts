@@ -14,6 +14,7 @@ export interface Todo {
   createdAt: string; // ISO
   updatedAt: string; // ISO
   version: number; // optimistic concurrency token
+  assignee?: number | null; // user id or null
 }
 
 export interface ListParams {

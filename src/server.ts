@@ -4,10 +4,15 @@ import { db, isNewFile } from "./db";
 import { migrate } from "./db/migrate";
 import { seed } from "./db/seed";
 import { todosRouter } from "./routes/todos";
+import { usersRouter } from "./routes/users";
 import { errorMiddleware } from "./utils/errors";
 import { basicAuthMiddleware } from "./utils/basicAuth";
 
 export function createApp() {
+  // Always migrate and seed before creating the app (for tests and dev)
+  migrate(db as any, { isNewFile });
+  seed(db as any);
+
   const app = express();
 
   app.use((req, res, next) => {
@@ -36,6 +41,7 @@ export function createApp() {
   app.use(basicAuthMiddleware);
   app.get("/api/check", (req, res) => res.json({ ok: true }));
   app.use(todosRouter);
+  app.use(usersRouter);
 
   app.use((_req, res, _next) => {
     res.status(404).json({ code: 404, message: "Not found" });

@@ -33,6 +33,7 @@ interface TodoCreateBody {
   priority?: number;
   dueAt?: string;
   tags?: string[];
+  assignee?: number | null;
 }
 interface TodoPatchBody extends Partial<TodoCreateBody> {}
 
@@ -71,6 +72,7 @@ export function assertBodyTodoCreate(raw: unknown): TodoCreateBody {
   if (!raw || typeof raw !== 'object') httpError(422, 'body required');
   const body = raw as TodoCreateBody;
   validateCommon(body, false);
+  if (!('assignee' in body)) body.assignee = null;
   return body;
 }
 
@@ -79,5 +81,6 @@ export function assertBodyTodoPatch(raw: unknown): TodoPatchBody {
   const body = raw as TodoPatchBody;
   if (Object.keys(body).length === 0) httpError(422, 'empty patch');
   validateCommon(body, true);
+  if (!('assignee' in body)) body.assignee = undefined;
   return body;
 }
