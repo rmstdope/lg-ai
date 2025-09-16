@@ -8,7 +8,7 @@ A small full‑stack TypeScript playground showing a Todo list with an Express +
 
 Backend:
 
-- Node.js 24 (run via tsx in dev)
+- Node.js 24 (run via tsx in dev)cd
 - Express 5 (beta line)
 - better-sqlite3 for a file‑backed SQLite DB
 - TypeScript
